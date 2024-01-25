@@ -1,15 +1,20 @@
-const config = require('./config');
 const { MongoClient } = require('mongodb');
+const config = require('./config');
+
 // eslint-disable-next-line no-unused-vars
 
 const { dbUrl } = config;
-// extrae la variable de dbUrl de config.
-const client = new MongoClient(dbUrl);
-
-async function connect() {
+const options = {
+  connectTimeoutMS: 3000,
+  socketTimeoutMS: 3000,
+  serverSelectionTimeoutMS: 3000,
+};
+const client = new MongoClient(dbUrl, options);
+console.log(dbUrl);
+function connect() {
   try {
-    await client.connect();
-    const db = client.db('Burger-Queen');
+    //await client.connect();
+    const db = client.db('burger-queen-api');
     console.log('La conexión a la base de datos fue exitosa');
     return db;
   } catch (error) {
