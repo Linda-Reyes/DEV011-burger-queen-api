@@ -18,11 +18,12 @@ const initAdminUser = async (app, next) => {
   const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
-    roles: { admin: true },
+    roles: 'admin',
   };
 
   try {
-    const db = await connect(); // Conectar a la base de datos
+    console.log('Conexión a la base de datos exitosa');
+    const db = connect(); // Conectar a la base de datos
     const usersCollection = db.collection('users');
 
     // Verificar si ya existe un usuario admin
@@ -77,8 +78,26 @@ module.exports = (app, next) => {
   app.get('/users/:uid', requireAuth, (req, resp) => {
   });
 
-  app.post('/users', requireAdmin, (req, resp, next) => {
-    // TODO: Implement the route to add new users
+  app.post('/users', async (req, resp, next) => {
+    try {
+      const db = connect();
+      const usersCollection = db.collection('users');
+      console.log('Verificando la colección de usuarios', usersCollection);
+      // Se optiene los datos del nuevo usuario desde req.body o cualquier otra fuente.
+      const newUser = {
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role,
+        // Datos del nuevo usuario
+      };
+      // Insertar el nuevo usuario en la base de datos
+      const result = await usersCollection.insertOne(newUser);
+      console.log('Creación de usuario: ', result);
+      resp.status(201).json({ message: 'Usuario creado con éxito', userId: result.insertedId });
+    } catch (error) {
+      console.error('Error al crear un nuevo usuario:', error);
+      resp.status(500).json({ message: 'Error al intentar crear el usuario', error });
+    }
   });
 
   app.put('/users/:uid', requireAuth, (req, resp, next) => {
