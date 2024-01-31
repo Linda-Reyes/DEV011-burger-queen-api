@@ -7,6 +7,10 @@ const {
 
 const {
   getUsers,
+  postUsers,
+  getUsersUid,
+  deleteUsersUid,
+  updateUsersUid,
 } = require('../controller/users');
 
 const initAdminUser = async (app, next) => {
@@ -75,36 +79,13 @@ const initAdminUser = async (app, next) => {
 module.exports = (app, next) => {
   app.get('/users', requireAdmin, getUsers);
 
-  app.get('/users/:uid', requireAuth, (req, resp) => {
-  });
+  app.get('/users/:uid', requireAuth, getUsersUid);
 
-  app.post('/users', async (req, resp, next) => {
-    try {
-      const db = connect();
-      const usersCollection = db.collection('users');
-      console.log('Verificando la colección de usuarios', usersCollection);
-      // Se optiene los datos del nuevo usuario desde req.body o cualquier otra fuente.
-      const newUser = {
-        email: req.body.email,
-        password: req.body.password,
-        role: req.body.role,
-        // Datos del nuevo usuario
-      };
-      // Insertar el nuevo usuario en la base de datos
-      const result = await usersCollection.insertOne(newUser);
-      console.log('Creación de usuario: ', result);
-      resp.status(201).json({ message: 'Usuario creado con éxito', userId: result.insertedId });
-    } catch (error) {
-      console.error('Error al crear un nuevo usuario:', error);
-      resp.status(500).json({ message: 'Error al intentar crear el usuario', error });
-    }
-  });
+  app.post('/users', requireAdmin, postUsers);
 
-  app.put('/users/:uid', requireAuth, (req, resp, next) => {
-  });
+  app.put('/users/:uid', requireAuth, updateUsersUid);
 
-  app.delete('/users/:uid', requireAuth, (req, resp, next) => {
-  });
+  app.delete('/users/:uid', requireAuth, deleteUsersUid);
 
   initAdminUser(app, next);
 };
